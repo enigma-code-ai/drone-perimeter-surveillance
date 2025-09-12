@@ -247,10 +247,6 @@ class AdvancedDroneTeleop(Node):
         self.use_rich_ui = False
     
     def setup_rich_ui(self):
-        """Setup Rich UI for advanced display"""
-        self.use_rich_ui = True
-    
-    def setup_rich_ui(self):
         """Setup Rich console-based HUD"""
         self.layout = Layout()
         
