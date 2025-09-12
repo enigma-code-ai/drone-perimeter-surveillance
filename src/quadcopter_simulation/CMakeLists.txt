@@ -15,8 +15,10 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(ros_gz REQUIRED)
 find_package(gz_ros2_control REQUIRED)
+find_package(xacro REQUIRED)
 
 # Include directories
 include_directories(include)
@@ -30,7 +32,8 @@ ament_target_dependencies(drone_controller
   sensor_msgs 
   nav_msgs
   tf2 
-  tf2_ros)
+  tf2_ros
+  tf2_geometry_msgs)
 
 # Install targets
 install(TARGETS drone_controller 

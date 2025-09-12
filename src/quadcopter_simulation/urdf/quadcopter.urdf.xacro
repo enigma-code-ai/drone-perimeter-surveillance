@@ -88,24 +88,16 @@
       <child link="rotor_${motor_number}" />
     </joint>
     
-    <!-- Motor plugin -->
-    <gazebo>
-      <plugin name="motor_${motor_number}_plugin" filename="libgazebo_motor_model.so">
-        <jointName>rotor_${motor_number}_joint</jointName>
-        <linkName>rotor_${motor_number}</linkName>
-        <turningDirection>${direction}</turningDirection>
-        <timeConstantUp>${time_constant_up}</timeConstantUp>
-        <timeConstantDown>${time_constant_down}</timeConstantDown>
-        <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
-        <motorConstant>${motor_constant}</motorConstant>
-        <momentConstant>${moment_constant}</momentConstant>
-        <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
-        <motorNumber>${motor_number}</motorNumber>
-        <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
-        <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
-        <motorSpeedPubTopic>/motor_speed/${motor_number}</motorSpeedPubTopic>
-        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
-      </plugin>
+    <!-- Motor plugin - Modern Gazebo Harmonic approach -->
+    <gazebo reference="rotor_${motor_number}">
+      <sensor name="motor_${motor_number}_force_torque" type="force_torque">
+        <always_on>true</always_on>
+        <update_rate>1000</update_rate>
+        <force_torque>
+          <frame>child</frame>
+          <measure_direction>child_to_parent</measure_direction>
+        </force_torque>
+      </sensor>
     </gazebo>
   </xacro:macro>
 
@@ -142,19 +134,12 @@
     <sensor name="imu_sensor" type="imu">
       <always_on>true</always_on>
       <update_rate>250</update_rate>
-      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
-        <topicName>imu/data</topicName>
-        <bodyName>imu_link</bodyName>
-        <updateRateHZ>250.0</updateRateHZ>
-        <gaussianNoise>0.01</gaussianNoise>
-        <xyzOffset>0 0 0</xyzOffset>
-        <rpyOffset>0 0 0</rpyOffset>
-        <frameName>imu_link</frameName>
-        <initialOrientationAsReference>false</initialOrientationAsReference>
+      <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu">
         <ros>
           <namespace>/drone</namespace>
           <remapping>~/out:=imu/data</remapping>
         </ros>
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
       </plugin>
     </sensor>
   </gazebo>
@@ -198,7 +183,7 @@
           <far>300</far>
         </clip>
       </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+      <plugin name="camera_controller" filename="gz-sim-camera-system">
         <ros>
           <namespace>/drone</namespace>
           <remapping>~/image_raw:=camera/image_raw</remapping>
@@ -249,7 +234,7 @@
   </ros2_control>
 
   <gazebo>
-    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GzROS2ControlPlugin">
       <parameters>$(find quadcopter_simulation)/config/drone_controllers.yaml</parameters>
     </plugin>
   </gazebo>

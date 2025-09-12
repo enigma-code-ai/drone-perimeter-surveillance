@@ -186,8 +186,9 @@ drone-perimeter-surveillance/
 │   │   ├── launch/
 │   │   │   └── gazebo_sim.launch.py      # Main launch file
 │   │   ├── urdf/
-│   │   │   ├── quadcopter.urdf.xacro     # Complete drone model
-│   │   │   └── simple_quadcopter.urdf    # Simplified model for testing
+│   │   │   ├── quadcopter.urdf.xacro     # Complete drone model (source)
+│   │   │   ├── quadcopter.urdf           # Compiled drone model
+│   │   │   └── quadcopter_simple.urdf    # Simplified model for testing
 │   │   ├── rviz/
 │   │   │   └── drone_config.rviz         # RViz visualization config
 │   │   ├── worlds/
@@ -297,7 +298,7 @@ colcon build --symlink-install
 
 - Reduce Gazebo physics update rate if experiencing lag
 - Disable camera plugin if not needed
-- Use `simple_quadcopter.urdf` for basic testing
+- Use `quadcopter_simple.urdf` for basic testing
 
 ## Testing
 

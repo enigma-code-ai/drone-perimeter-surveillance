@@ -1,0 +1,19 @@
+{
+    "cmake.sourceDirectory": "C:/Users/Soheil/Desktop/enigma-code/drone-perimeter-surveillance/src/quadcopter_simulation",
+    "terminal.integrated.defaultProfile.windows": "Ubuntu-24.04",
+    "terminal.integrated.profiles.windows": {
+        "Ubuntu-24.04": {
+            "path": "C:\\Users\\Soheil\\AppData\\Local\\Microsoft\\WindowsApps\\ubuntu2404.exe",
+            "icon": "terminal-ubuntu",
+            "args": [
+                "--cd",
+                "${workspaceFolder}"
+            ],
+            "env": {
+                "DISPLAY": ":0"
+            }
+        }
+    },
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    "files.eol": "\n"
+}

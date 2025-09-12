@@ -23,7 +23,7 @@ def generate_launch_description():
     urdf_file = os.path.join(
         get_package_share_directory('quadcopter_simulation'),
         'urdf',
-        'quadcopter_complete.urdf'
+        'quadcopter.urdf'
     )
     
     world_file = os.path.join(
