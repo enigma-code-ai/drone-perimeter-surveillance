@@ -116,10 +116,6 @@ class DroneState:
             self.position.z = 0.0
         if self.geofence_violations is None:
             self.geofence_violations = []
-        if self.position is None:
-            self.position = Point()
-        if self.geofence_violations is None:
-            self.geofence_violations = []
 
 @dataclass
 class ControlSettings:
