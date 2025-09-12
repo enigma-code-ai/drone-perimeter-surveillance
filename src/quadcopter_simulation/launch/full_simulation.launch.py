@@ -14,7 +14,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
     # Package paths
     pkg_quadcopter = FindPackageShare('quadcopter_simulation')
-    pkg_gazebo_ros = FindPackageShare('gazebo_ros')
+    pkg_ros_gz_sim = FindPackageShare('ros_gz_sim')
     
     # Launch arguments
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
@@ -23,7 +23,7 @@ def generate_launch_description():
     # Files
     urdf_file = PathJoinSubstitution([pkg_quadcopter, 'urdf', 'quadcopter.urdf.xacro'])
     rviz_config = PathJoinSubstitution([pkg_quadcopter, 'rviz', 'drone_config.rviz'])
-    world_file = PathJoinSubstitution([pkg_quadcopter, 'worlds', 'drone_world.world'])
+    world_file = PathJoinSubstitution([pkg_quadcopter, 'worlds', 'drone_world.sdf'])
     controller_config = PathJoinSubstitution([pkg_quadcopter, 'config', 'drone_controllers.yaml'])
     
     # Robot description
@@ -54,17 +54,17 @@ def generate_launch_description():
     # Gazebo
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            PathJoinSubstitution([pkg_gazebo_ros, 'launch', 'gazebo.launch.py'])
+            PathJoinSubstitution([pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py'])
         ),
-        launch_arguments={'world': world_file}.items()
+        launch_arguments={'gz_args': ['-r -s ', world_file]}.items()
     )
     
     # Spawn robot
     spawn_robot = Node(
-        package='gazebo_ros',
-        executable='spawn_entity.py',
+        package='ros_gz_sim',
+        executable='create',
         arguments=['-topic', 'robot_description',
-                  '-entity', 'quadcopter',
+                  '-name', 'quadcopter',
                   '-x', '0.0', '-y', '0.0', '-z', '0.5'],
         output='screen'
     )

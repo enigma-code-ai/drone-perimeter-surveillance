@@ -119,6 +119,20 @@ private:
         target_vel_y_ = msg->linear.y;
         target_vel_z_ = msg->linear.z;
         target_yaw_rate_ = msg->angular.z;
+        
+        // Convert velocity commands to position targets (velocity control mode)
+        double dt = 0.01; // Control loop rate
+        target_x_ += target_vel_x_ * dt;
+        target_y_ += target_vel_y_ * dt;
+        target_z_ += target_vel_z_ * dt;
+        target_yaw_ += target_yaw_rate_ * dt;
+        
+        // Ensure drone doesn't go below ground
+        if (target_z_ < 0.1) target_z_ = 0.1;
+        
+        // Log velocity commands for debugging
+        RCLCPP_DEBUG(this->get_logger(), "Vel cmd: x=%.2f, y=%.2f, z=%.2f, yaw_rate=%.2f", 
+                     target_vel_x_, target_vel_y_, target_vel_z_, target_yaw_rate_);
     }
     
     void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg) {

@@ -47,7 +47,6 @@ install(DIRECTORY launch config urdf rviz worlds scripts
 install(PROGRAMS
   scripts/drone_teleop.py
   scripts/waypoint_follower.py
-  scripts/drone_teleop_safe.py
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

@@ -144,6 +144,22 @@
     </sensor>
   </gazebo>
 
+  <!-- Pose Publisher -->
+  <gazebo reference="base_link">
+    <plugin name="pose_publisher" filename="gz-sim-pose-publisher-system">
+      <ros>
+        <namespace>/drone</namespace>
+        <remapping>~/pose:=pose</remapping>
+      </ros>
+      <publish_link_pose>true</publish_link_pose>
+      <publish_collision_pose>false</publish_collision_pose>
+      <publish_visual_pose>false</publish_visual_pose>
+      <use_pose_vector_msg>false</use_pose_vector_msg>
+      <static_publisher>false</static_publisher>
+      <static_update_frequency>1</static_update_frequency>
+    </plugin>
+  </gazebo>
+
   <!-- Camera Sensor -->
   <link name="camera_link">
     <inertial>
@@ -236,6 +252,21 @@
   <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GzROS2ControlPlugin">
       <parameters>$(find quadcopter_simulation)/config/drone_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+  <!-- Motor Speed Controller Plugin -->
+  <gazebo>
+    <plugin name="motor_speed_controller" filename="gz-sim-joint-position-controller-system">
+      <ros>
+        <namespace>/drone</namespace>
+        <remapping>~/cmd:=motor_commands</remapping>
+      </ros>
+      <joint_name>rotor_0_joint</joint_name>
+      <joint_name>rotor_1_joint</joint_name>
+      <joint_name>rotor_2_joint</joint_name>
+      <joint_name>rotor_3_joint</joint_name>
+      <use_velocity_commands>true</use_velocity_commands>
     </plugin>
   </gazebo>
 

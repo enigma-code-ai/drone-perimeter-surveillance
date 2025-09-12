@@ -118,6 +118,15 @@ def generate_launch_description():
         output='screen'
     )
     
+    # Bridge for pose (using world state)
+    bridge_pose = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/world/drone_world/pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'],
+        remappings=[('/world/drone_world/pose/info', '/tf')],
+        output='screen'
+    )
+    
     # TF publisher for world to base_link
     static_tf_world = Node(
         package='tf2_ros',
@@ -170,7 +179,7 @@ def generate_launch_description():
         
         # Delayed actions to ensure Gazebo is ready
         TimerAction(period=2.0, actions=[spawn_drone]),
-        TimerAction(period=3.0, actions=[bridge_clock, bridge_imu, bridge_cmd_vel]),
+        TimerAction(period=3.0, actions=[bridge_clock, bridge_imu, bridge_cmd_vel, bridge_pose]),
         TimerAction(period=5.0, actions=[drone_controller]),
         TimerAction(period=2.0, actions=[rviz])
     ])
