@@ -1,0 +1,111 @@
+[tool.black]
+line-length = 88
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | install
+  | log
+  | logs
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["quadcopter_simulation"]
+known_third_party = ["rclpy", "geometry_msgs", "sensor_msgs", "std_msgs", "nav_msgs"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+default_section = "THIRDPARTY"
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+# Exclude build, install, and log directories
+exclude = [
+    "build/",
+    "install/",
+    "log/",
+    "logs/",
+    ".venv/",
+    "__pycache__/",
+]
+
+# ROS2 related ignores
+[[tool.mypy.overrides]]
+module = [
+    "rclpy.*",
+    "geometry_msgs.*",
+    "sensor_msgs.*",
+    "std_msgs.*",
+    "nav_msgs.*",
+    "visualization_msgs.*",
+    "tf2_ros.*",
+    "launch.*",
+    "launch_ros.*",
+    "ament_index_python.*",
+    "gazebo_msgs.*",
+    "tf2_geometry_msgs.*"
+]
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "build", "install", "log"]
+skips = ["B101", "B601"]  # Skip assert and shell injection in test files
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = [
+    "E203",  # whitespace before ':'
+    "E501",  # line too long (handled by black)
+    "W503",  # line break before binary operator
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public class
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "install",
+    "log",
+    "logs",
+    ".venv",
+    "venv",
+    ".eggs",
+    "*.egg",
+]
+per-file-ignores = [
+    "__init__.py:F401",  # imported but unused
+    "test_*.py:D",       # no docstrings required in tests
+]
+docstring-convention = "google"
+import-order-style = "google"

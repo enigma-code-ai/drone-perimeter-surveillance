@@ -2,6 +2,7 @@
 build/
 install/
 log/
+logs/
 
 # ROS2 specific
 .built_by
@@ -15,9 +16,12 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 env.bak/
 venv.bak/
+.mypy_cache/
+.pytest_cache/
 
 # IDEs
 .vscode/launch.json
