@@ -15,171 +15,192 @@ def generate_launch_description():
     pkg_quadcopter = FindPackageShare('quadcopter_simulation')
     
     # Launch arguments
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    use_rviz = LaunchConfiguration('use_rviz', default='true')
-    headless = LaunchConfiguration('headless', default='false')
+    world_name = DeclareLaunchArgument(
+        'world_name',
+        default_value='drone_world.sdf',
+        description='Name of the world to load'
+    )
     
     # Paths
-    urdf_file = os.path.join(
-        get_package_share_directory('quadcopter_simulation'),
-        'urdf',
-        'quadcopter.urdf'
-    )
-    
-    world_file = os.path.join(
-        get_package_share_directory('quadcopter_simulation'),
+    world_file = PathJoinSubstitution([
+        pkg_quadcopter,
         'worlds',
-        'drone_world.sdf'
-    )
+        LaunchConfiguration('world_name')
+    ])
     
-    rviz_config = os.path.join(
-        get_package_share_directory('quadcopter_simulation'),
-        'rviz',
-        'drone_config.rviz'
-    )
+    urdf_file = PathJoinSubstitution([
+        pkg_quadcopter,
+        'urdf',
+        'quadcopter.urdf.xacro'
+    ])
     
-    # Read URDF file
-    with open(urdf_file, 'r') as file:
-        robot_description = file.read()
+    # Robot description using xacro
+    robot_description = Command([
+        'xacro ',
+        urdf_file
+    ])
     
-    # Start Gazebo with or without GUI
-    gazebo_gui = ExecuteProcess(
-        cmd=['gz', 'sim', '-r', '-v', '4', world_file],
-        output='screen',
-        condition=UnlessCondition(headless)
-    )
-    
-    gazebo_headless = ExecuteProcess(
-        cmd=['gz', 'sim', '-r', '-v', '4', '-s', world_file],
-        output='screen',
-        condition=IfCondition(headless)
-    )
-    
-    # Robot state publisher
+    # Robot State Publisher
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         name='robot_state_publisher',
         output='screen',
-        parameters=[{
-            'robot_description': robot_description,
-            'use_sim_time': use_sim_time
-        }]
+        parameters=[
+            {'robot_description': robot_description},
+            {'use_sim_time': True}
+        ]
     )
     
-    # Joint state publisher
+    # Joint State Publisher
     joint_state_publisher = Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
         name='joint_state_publisher',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'rate': 50
-        }]
+        output='screen',
+        parameters=[{'use_sim_time': True}]
     )
     
-    # Spawn the drone in Gazebo
-    spawn_drone = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=[
-            '-name', 'quadcopter',
-            '-string', robot_description,
-            '-x', '0.0',
-            '-y', '0.0',
-            '-z', '0.5'
-        ],
+    # Gazebo Server (gz sim)
+    gazebo_server = ExecuteProcess(
+        cmd=['gz', 'sim', '-s', '-v4', world_file],
+        name='gazebo_server',
         output='screen'
     )
     
-    # Bridge for clock
+    # Gazebo Client (GUI)
+    gazebo_client = ExecuteProcess(
+        cmd=['gz', 'sim', '-g', '-v4'],
+        name='gazebo_client',
+        output='screen',
+        condition=IfCondition(PythonExpression(["'true' == 'true'"]))
+    )
+    
+    # Spawn robot
+    spawn_entity = Node(
+        package='ros_gz_sim',
+        executable='create',
+        name='spawn_quadcopter',
+        arguments=[
+            '-topic', 'robot_description',
+            '-name', 'quadcopter',
+            '-x', '0.0',
+            '-y', '0.0',
+            '-z', '2.0',
+            '-R', '0.0',
+            '-P', '0.0',
+            '-Y', '0.0'
+        ],
+        output='screen',
+        respawn=False,
+        parameters=[{'use_sim_time': True}]
+    )
+    
+    # Clock bridge
     bridge_clock = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
+        name='clock_bridge',
         arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
-        output='screen'
+        output='screen',
+        parameters=[{'use_sim_time': True}]
     )
     
-    # Bridge for IMU
+    # IMU bridge with correct topic path (fixed joint collapses to base_link)
     bridge_imu = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
-        arguments=['/world/drone_world/model/quadcopter/link/imu_link/sensor/imu_sensor/imu@sensor_msgs/msg/Imu[gz.msgs.IMU'],
-        remappings=[('/world/drone_world/model/quadcopter/link/imu_link/sensor/imu_sensor/imu', '/drone/imu/data')],
-        output='screen'
+        name='imu_bridge',
+        arguments=[
+            '/world/drone_world/model/quadcopter/link/base_link/sensor/imu_sensor/imu@sensor_msgs/msg/Imu[gz.msgs.IMU'
+        ],
+        remappings=[
+            ('/world/drone_world/model/quadcopter/link/base_link/sensor/imu_sensor/imu', '/drone/imu/data')
+        ],
+        output='screen',
+        parameters=[{'use_sim_time': True}]
     )
     
-    # Bridge for cmd_vel
-    bridge_cmd_vel = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        arguments=['/model/quadcopter/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'],
-        remappings=[('/model/quadcopter/cmd_vel', '/cmd_vel')],
-        output='screen'
-    )
-    
-    # Bridge for pose (using world state)
+    # Pose bridge with correct message type
     bridge_pose = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
-        arguments=['/world/drone_world/pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'],
-        remappings=[('/world/drone_world/pose/info', '/tf')],
-        output='screen'
+        name='pose_bridge',
+        arguments=[
+            '/model/quadcopter/pose@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'
+        ],
+        remappings=[('/model/quadcopter/pose', '/tf')],
+        output='screen',
+        parameters=[{'use_sim_time': True}]
     )
     
-    # TF publisher for world to base_link
-    static_tf_world = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        arguments=['0', '0', '0', '0', '0', '0', 'world', 'odom'],
-        output='screen'
-    )
-    
-    # Drone controller
+    # Command velocity bridge for direct control
+    bridge_cmd_vel = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='cmd_vel_bridge',
+        arguments=[
+            '/model/quadcopter/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'
+        ],
+        remappings=[('/model/quadcopter/cmd_vel', '/drone/cmd_vel')],
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )    # Python drone controller
     drone_controller = Node(
         package='quadcopter_simulation',
-        executable='drone_controller',
+        executable='drone_controller.py',
         name='drone_controller',
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'mass': 1.5,
-            'arm_length': 0.15,
-            'thrust_coefficient': 8.54858e-06,
-            'max_thrust': 15.0
-        }]
+        parameters=[{'use_sim_time': True}]
     )
-    
-    # RViz
-    rviz = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', rviz_config],
-        condition=IfCondition(use_rviz),
-        output='screen'
+
+    # Motor command bridges - connect ROS motor commands to Gazebo motor speeds
+    bridge_motor_0 = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='motor_0_bridge',
+        arguments=['/model/quadcopter/motor_speed_0@std_msgs/msg/Float64[gz.msgs.Double'],
+        output='screen',
+        parameters=[{'use_sim_time': True}]
     )
-    
+
+    bridge_motor_1 = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge', 
+        name='motor_1_bridge',
+        arguments=['/model/quadcopter/motor_speed_1@std_msgs/msg/Float64[gz.msgs.Double'],
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )
+
+    bridge_motor_2 = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='motor_2_bridge',
+        arguments=['/model/quadcopter/motor_speed_2@std_msgs/msg/Float64[gz.msgs.Double'],
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )
+
+    bridge_motor_3 = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='motor_3_bridge',
+        arguments=['/model/quadcopter/motor_speed_3@std_msgs/msg/Float64[gz.msgs.Double'], 
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )
+
     return LaunchDescription([
-        # Declare launch arguments
-        DeclareLaunchArgument('use_sim_time', default_value='true'),
-        DeclareLaunchArgument('use_rviz', default_value='true'),
-        DeclareLaunchArgument('headless', default_value='false'),
-        
-        # Launch Gazebo
-        gazebo_gui,
-        gazebo_headless,
-        
-        # Launch robot description nodes
+        world_name,
         robot_state_publisher,
         joint_state_publisher,
-        
-        # Static transforms
-        static_tf_world,
-        
-        # Delayed actions to ensure Gazebo is ready
-        TimerAction(period=2.0, actions=[spawn_drone]),
-        TimerAction(period=3.0, actions=[bridge_clock, bridge_imu, bridge_cmd_vel, bridge_pose]),
-        TimerAction(period=5.0, actions=[drone_controller]),
-        TimerAction(period=2.0, actions=[rviz])
+        gazebo_server,
+        gazebo_client,
+        TimerAction(period=2.0, actions=[spawn_entity]),
+        TimerAction(period=3.0, actions=[
+            bridge_clock, bridge_imu, bridge_pose, bridge_cmd_vel,
+            bridge_motor_0, bridge_motor_1, bridge_motor_2, bridge_motor_3
+        ]),
+        TimerAction(period=4.0, actions=[drone_controller]),
     ])

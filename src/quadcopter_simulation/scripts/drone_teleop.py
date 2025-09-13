@@ -178,11 +178,19 @@ class AdvancedDroneTeleop(Node):
         )
         
         # Publishers
-        self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', qos_profile)
-        self.mode_pub = self.create_publisher(String, '/flight_mode', qos_profile)
+        self.cmd_vel_pub = self.create_publisher(
+            Twist, '/cmd_vel', qos_profile
+        )
+        self.mode_pub = self.create_publisher(
+            String, '/flight_mode', qos_profile
+        )
         self.arm_pub = self.create_publisher(Bool, '/arm', qos_profile)
-        self.waypoint_pub = self.create_publisher(PoseStamped, '/waypoint_target', qos_profile)
-        self.path_pub = self.create_publisher(Path, '/mission_path', qos_profile)
+        self.waypoint_pub = self.create_publisher(
+            PoseStamped, '/waypoint_target', qos_profile
+        )
+        self.path_pub = self.create_publisher(
+            Path, '/mission_path', qos_profile
+        )
         
         # Subscribers
         self.pose_sub = self.create_subscription(
