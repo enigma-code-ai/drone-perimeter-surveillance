@@ -12,7 +12,7 @@ def generate_launch_description():
     pkg_dir = get_package_share_directory('quadcopter')
     
     # Path to URDF file
-    urdf_file = os.path.join(pkg_dir, 'urdf', 'quadcopter.urdf')
+    urdf_file = os.path.join(pkg_dir, 'urdf', 'Quadcopter.urdf')
     
     # Read URDF file
     with open(urdf_file, 'r') as infp:
@@ -71,10 +71,47 @@ def generate_launch_description():
         ],
     )
 
+    # Bridge for joint states
+    joint_state_bridge_node = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='joint_state_bridge',
+        output='screen',
+        arguments=['/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model'],
+    )
+
+    # RViz configuration file path
+    rviz_config_file = os.path.join(pkg_dir, 'config', 'quadcopter_view.rviz')
+    
+    # RViz node
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config_file] if os.path.exists(rviz_config_file) else [],
+        parameters=[{'use_sim_time': True}],
+    )
+
+    # Fallback joint state publisher (in case Gazebo plugin doesn't work)
+    joint_state_publisher_node = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        output='screen',
+        parameters=[
+            {'use_sim_time': True},
+            {'source_list': ['/joint_states']},
+        ],
+    )
+
     return LaunchDescription([
         gazebo_launch,
         robot_state_publisher_node,
         spawn_entity_node,
         static_tf_node,
         bridge_node,
+        joint_state_bridge_node,
+        joint_state_publisher_node,
+        rviz_node,
     ])
