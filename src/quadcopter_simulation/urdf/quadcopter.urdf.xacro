@@ -1,0 +1,388 @@
+<?xml version="1.0"?>
+<robot name="quadrotor" xmlns:xacro="http://ros.org/wiki/xacro">
+  
+  <!-- Properties for 250-450mm quadcopter -->
+  <xacro:property name="namespace" value="drone" />
+  <xacro:property name="mass" value="1.50" /> <!-- [kg] -->
+  <xacro:property name="body_width" value="0.3" /> <!-- [m] -->
+  <xacro:property name="body_height" value="0.15" /> <!-- [m] -->
+  <xacro:property name="mass_rotor" value="0.005" /> <!-- [kg] -->
+  <xacro:property name="arm_length" value="0.22" /> <!-- [m] -->
+  <xacro:property name="rotor_offset_top" value="0.025" /> <!-- [m] -->
+  <xacro:property name="radius_rotor" value="0.14" /> <!-- [m] -->
+  
+  <!-- Motor constants for 2300KV brushless motors -->
+  <xacro:property name="motor_constant" value="2.95e-05" />
+  <xacro:property name="moment_constant" value="0.016" />
+  <xacro:property name="time_constant_up" value="0.0125" />
+  <xacro:property name="time_constant_down" value="0.025" />
+  <xacro:property name="max_rot_velocity" value="1100" /> <!-- [rad/s] -->
+  <xacro:property name="rotor_drag_coefficient" value="8.06428e-05" />
+  <xacro:property name="rolling_moment_coefficient" value="1e-06" />
+  
+  <!-- Body inertia properties - Fixed for Gazebo Harmonic -->
+  <xacro:property name="body_inertia">
+    <inertia ixx="0.0347" ixy="0.0" ixz="0.0" 
+             iyy="0.0395" iyz="0.0" 
+             izz="0.0614" />
+  </xacro:property>
+  
+  <!-- Base link -->
+  <link name="base_link">
+    <inertial>
+      <mass value="${mass}" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <xacro:insert_block name="body_inertia" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="${body_width} ${body_width} ${body_height}"/>
+      </geometry>
+      <material name="red">
+        <color rgba="0.8 0 0 1"/>
+      </material>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="${body_width} ${body_width} ${body_height}"/>
+      </geometry>
+    </collision>
+  </link> 
+
+  <!-- Motor/Rotor macro -->
+  <xacro:macro name="vertical_rotor" params="motor_number x_pos y_pos direction color">
+    
+    <link name="rotor_${motor_number}">
+      <inertial>
+        <mass value="${mass_rotor}" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="9.75e-07" ixy="0.0" ixz="0.0"
+                 iyy="0.000166704" iyz="0.0"
+                 izz="0.000167604" />
+      </inertial>
+      
+      <visual>
+        <geometry>
+          <cylinder length="0.005" radius="${radius_rotor}"/>
+        </geometry>
+        <material name="${color}">
+          <color rgba="0 0 1 0.7"/>
+        </material>
+      </visual>
+      
+      <collision>
+        <geometry>
+          <cylinder length="0.005" radius="${radius_rotor}"/>
+        </geometry>
+      </collision>
+    </link>
+    
+    <joint name="rotor_${motor_number}_joint" type="continuous">
+      <origin xyz="${x_pos} ${y_pos} ${rotor_offset_top}" rpy="0 0 0" />
+      <axis xyz="0 0 1" />
+      <parent link="base_link" />
+      <child link="rotor_${motor_number}" />
+    </joint>
+    
+    <!-- Motor plugin - Modern Gazebo Harmonic approach -->
+    <gazebo reference="rotor_${motor_number}">
+      <sensor name="motor_${motor_number}_force_torque" type="force_torque">
+        <always_on>true</always_on>
+        <update_rate>1000</update_rate>
+        <force_torque>
+          <frame>child</frame>
+          <measure_direction>child_to_parent</measure_direction>
+        </force_torque>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Create 4 rotors in X configuration -->
+  <xacro:vertical_rotor motor_number="0" x_pos="${arm_length}" y_pos="0" direction="ccw" color="blue"/>
+  <xacro:vertical_rotor motor_number="1" x_pos="0" y_pos="-${arm_length}" direction="cw" color="green"/>
+  <xacro:vertical_rotor motor_number="2" x_pos="-${arm_length}" y_pos="0" direction="ccw" color="blue"/>
+  <xacro:vertical_rotor motor_number="3" x_pos="0" y_pos="${arm_length}" direction="cw" color="green"/>
+
+  <!-- IMU Sensor -->
+  <link name="imu_link">
+    <inertial>
+      <mass value="0.015" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" 
+               iyy="0.00001" iyz="0.0" 
+               izz="0.00001" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.01 0.01 0.005"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+  </joint>
+
+  <!-- IMU Gazebo Plugin -->
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>250</update_rate>
+      <visualize>true</visualize>
+      <imu>
+        <angular_velocity>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>2e-4</stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>2e-4</stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>2e-4</stddev>
+            </noise>
+          </z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>1.7e-2</stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>1.7e-2</stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>1.7e-2</stddev>
+            </noise>
+          </z>
+        </linear_acceleration>
+      </imu>
+      <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu">
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- Pose Publisher -->
+    <!-- Pose Publisher Plugin for state estimation -->
+  <gazebo>
+    <plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
+      <publish_link_pose>true</publish_link_pose>
+      <use_pose_vector_msg>true</use_pose_vector_msg>
+      <static_publisher>true</static_publisher>
+      <static_update_frequency>250</static_update_frequency>
+    </plugin>
+  </gazebo>
+
+  <!-- Motor Controllers - Essential for Gazebo Harmonic -->
+  <gazebo reference="rotor_0">
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace></robotNamespace>
+      <jointName>rotor_0_joint</jointName>
+      <linkName>rotor_0</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>motor_speed_0</commandSubTopic>
+      <motorNumber>0</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed_0</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="rotor_1">
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace></robotNamespace>
+      <jointName>rotor_1_joint</jointName>
+      <linkName>rotor_1</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>motor_speed_1</commandSubTopic>
+      <motorNumber>1</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed_1</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="rotor_2">
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace></robotNamespace>
+      <jointName>rotor_2_joint</jointName>
+      <linkName>rotor_2</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>motor_speed_2</commandSubTopic>
+      <motorNumber>2</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed_2</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="rotor_3">
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace></robotNamespace>
+      <jointName>rotor_3_joint</jointName>
+      <linkName>rotor_3</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>motor_speed_3</commandSubTopic>
+      <motorNumber>3</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed_3</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+    </plugin>
+  </gazebo>
+
+  <!-- Camera Sensor -->
+  <link name="camera_link">
+    <inertial>
+      <mass value="0.02" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0"
+               iyy="0.00001" iyz="0.0"
+               izz="0.00001" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.02 0.05 0.02"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0.12 0 -0.05" rpy="0 0.3 0"/>
+  </joint>
+
+  <!-- Camera Gazebo Plugin -->
+  <gazebo reference="camera_link">
+    <sensor type="camera" name="camera">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>600</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller" filename="gz-sim-camera-system">
+        <ros>
+          <namespace>/drone</namespace>
+          <remapping>~/image_raw:=camera/image_raw</remapping>
+          <remapping>~/camera_info:=camera/camera_info</remapping>
+        </ros>
+        <frame_name>camera_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ros2_control integration -->
+  <ros2_control name="DroneSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    
+    <joint name="rotor_0_joint">
+      <command_interface name="velocity">
+        <param name="min">0</param>
+        <param name="max">1100</param>
+      </command_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="rotor_1_joint">
+      <command_interface name="velocity">
+        <param name="min">0</param>
+        <param name="max">1100</param>
+      </command_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="rotor_2_joint">
+      <command_interface name="velocity">
+        <param name="min">0</param>
+        <param name="max">1100</param>
+      </command_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    
+    <joint name="rotor_3_joint">
+      <command_interface name="velocity">
+        <param name="min">0</param>
+        <param name="max">1100</param>
+      </command_interface>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GzROS2ControlPlugin">
+      <parameters>$(find quadcopter_simulation)/config/drone_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+  <!-- Motor Speed Controller Plugin -->
+  <gazebo>
+    <plugin name="motor_speed_controller" filename="gz-sim-joint-position-controller-system">
+      <ros>
+        <namespace>/drone</namespace>
+        <remapping>~/cmd:=motor_commands</remapping>
+      </ros>
+      <joint_name>rotor_0_joint</joint_name>
+      <joint_name>rotor_1_joint</joint_name>
+      <joint_name>rotor_2_joint</joint_name>
+      <joint_name>rotor_3_joint</joint_name>
+      <use_velocity_commands>true</use_velocity_commands>
+    </plugin>
+  </gazebo>
+
+</robot>

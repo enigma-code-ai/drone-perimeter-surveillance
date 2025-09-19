@@ -1,0 +1,98 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    drone_controller:
+      type: drone_controllers/DroneController
+
+joint_state_broadcaster:
+  ros__parameters:
+    joints:
+      - rotor_0_joint
+      - rotor_1_joint  
+      - rotor_2_joint
+      - rotor_3_joint
+
+drone_controller:
+  ros__parameters:
+    joints:
+      - rotor_0_joint
+      - rotor_1_joint
+      - rotor_2_joint
+      - rotor_3_joint
+    
+    # PID gains for position control
+    position_x_pid:
+      kp: 1.5
+      ki: 0.0
+      kd: 0.5
+      max_output: 10.0
+      min_output: -10.0
+    
+    position_y_pid:
+      kp: 1.5
+      ki: 0.0
+      kd: 0.5
+      max_output: 10.0
+      min_output: -10.0
+    
+    position_z_pid:
+      kp: 2.0
+      ki: 0.1
+      kd: 1.0
+      max_output: 20.0
+      min_output: -20.0
+    
+    # PID gains for attitude control
+    roll_pid:
+      kp: 7.0
+      ki: 0.0
+      kd: 0.0
+      max_output: 50.0
+      min_output: -50.0
+    
+    pitch_pid:
+      kp: 7.0
+      ki: 0.0
+      kd: 0.0
+      max_output: 50.0
+      min_output: -50.0
+    
+    yaw_pid:
+      kp: 5.0
+      ki: 0.0
+      kd: 0.0
+      max_output: 30.0
+      min_output: -30.0
+    
+    # Rate control gains
+    roll_rate_pid:
+      kp: 0.15
+      ki: 0.05
+      kd: 0.003
+      max_output: 1.0
+      min_output: -1.0
+    
+    pitch_rate_pid:
+      kp: 0.15
+      ki: 0.05
+      kd: 0.003
+      max_output: 1.0
+      min_output: -1.0
+    
+    yaw_rate_pid:
+      kp: 0.2
+      ki: 0.05
+      kd: 0.0
+      max_output: 1.0
+      min_output: -1.0
+    
+    # Physical parameters
+    mass: 1.5  # kg
+    arm_length: 0.22  # meters
+    thrust_coefficient: 2.95e-05
+    torque_coefficient: 0.016
+    max_thrust: 15.0  # N per motor
