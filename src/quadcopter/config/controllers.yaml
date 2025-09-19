@@ -1,0 +1,70 @@
+# ROS2 Control Controllers Configuration for Quadcopter
+# This file configures the velocity controllers for each propeller
+
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+    
+    # Controller definitions
+    propeller_1_controller:
+      type: velocity_controllers/JointVelocityController
+    propeller_2_controller:
+      type: velocity_controllers/JointVelocityController
+    propeller_3_controller:
+      type: velocity_controllers/JointVelocityController
+    propeller_4_controller:
+      type: velocity_controllers/JointVelocityController
+    
+    # Joint state broadcaster for publishing joint states
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+# Individual propeller controllers configuration
+propeller_1_controller:
+  ros__parameters:
+    joint: propeller_1_joint
+    command_interface: velocity
+    state_interfaces:
+      - position
+      - velocity
+      - effort
+
+propeller_2_controller:
+  ros__parameters:
+    joint: propeller_2_joint
+    command_interface: velocity
+    state_interfaces:
+      - position
+      - velocity
+      - effort
+
+propeller_3_controller:
+  ros__parameters:
+    joint: propeller_3_joint
+    command_interface: velocity
+    state_interfaces:
+      - position
+      - velocity
+      - effort
+
+propeller_4_controller:
+  ros__parameters:
+    joint: propeller_4_joint
+    command_interface: velocity
+    state_interfaces:
+      - position
+      - velocity
+      - effort
+
+# Joint state broadcaster configuration
+joint_state_broadcaster:
+  ros__parameters:
+    joints:
+      - propeller_1_joint
+      - propeller_2_joint
+      - propeller_3_joint
+      - propeller_4_joint
+    interfaces:
+      - position
+      - velocity
+      - effort

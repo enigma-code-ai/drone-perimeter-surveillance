@@ -42,6 +42,21 @@ source install/setup.bash
 ros2 launch quadcopter gazebo.launch.py
 ```
 
+**Activate Sensors (Required for Gazebo Garden):**
+```bash
+# Activate IMU sensor
+gz service -s /world/empty/entity/system/add --reqtype gz.msgs.EntityPlugin_V --reptype gz.msgs.Boolean --timeout 1000 --req 'entity {id: 16} plugins {name: "gz::sim::systems::Imu" filename: "gz-sim-imu-system"}'
+
+# Activate Camera sensor  
+gz service -s /world/empty/entity/system/add --reqtype gz.msgs.EntityPlugin_V --reptype gz.msgs.Boolean --timeout 1000 --req 'entity {id: 17} plugins {name: "gz::sim::systems::Sensors" filename: "gz-sim-sensors-system"}'
+```
+
+**Available Topics:**
+- `/imu` - IMU sensor data
+- `/camera` - Camera images
+- `/camera_info` - Camera parameters
+- `/joint_states` - Propeller positions/velocities
+
 ### RViz - TODO
 
 To visualize the robot model in RViz, run the following command:

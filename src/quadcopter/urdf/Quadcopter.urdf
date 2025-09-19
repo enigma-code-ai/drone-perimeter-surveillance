@@ -4,6 +4,19 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
   name="quadcopter">
+  
+  <!-- Dummy root link to avoid KDL warning about root link with inertia -->
+  <link name="base_footprint">
+    <!-- No inertial properties - this is a dummy link -->
+  </link>
+  
+  <!-- Fixed joint connecting dummy root to actual base -->
+  <joint name="base_footprint_to_base" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_footprint" />
+    <child link="base_link" />
+  </joint>
+  
   <link
     name="base_link">
     <inertial>
@@ -11,14 +24,14 @@
         xyz="-0.001341 0.0013417 -0.0029971"
         rpy="0 0 0" />
       <mass
-        value="0.13344" />
+        value="1.0" />
       <inertia
-        ixx="0.00011864"
-        ixy="-3.3364E-11"
-        ixz="-1.7123E-10"
-        iyy="5.5982E-05"
-        iyz="-1.3427E-07"
-        izz="0.00015929" />
+        ixx="0.00089"
+        ixy="-2.5E-10"
+        ixz="-1.28E-09"
+        iyy="0.00042"
+        iyz="-1.01E-06"
+        izz="0.00119" />
     </inertial>
     <visual>
       <origin
@@ -153,8 +166,6 @@
     <axis
       xyz="0 0 1" />
     <limit
-      lower="0"
-      upper="0"
       effort="10"
       velocity="1000" />
   </joint>
@@ -211,8 +222,6 @@
     <axis
       xyz="0 0 1" />
     <limit
-      lower="0"
-      upper="0"
       effort="10"
       velocity="1000" />
   </joint>
@@ -269,8 +278,6 @@
     <axis
       xyz="0 0 1" />
     <limit
-      lower="0"
-      upper="0"
       effort="10"
       velocity="1000" />
   </joint>
@@ -354,7 +361,84 @@
     </sensor>
   </gazebo>
 
-  <!-- Joint State Publisher Plugin for Gazebo Garden -->
+  <!-- IMU Sensor -->
+  <gazebo reference="base_link">
+    <sensor name="imu" type="imu">
+      <always_on>true</always_on>
+      <update_rate>250</update_rate>
+      <topic>/imu</topic>
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.0001</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.0001</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.0001</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.01</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.01</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.01</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+    </sensor>
+  </gazebo>
+
+  <!-- ROS2 Control Configuration for Motor Control -->
+  <ros2_control name="QuadcopterSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    
+    <!-- Propeller Joint Control -->
+    <joint name="propeller_1">
+      <command_interface name="velocity">
+        <param name="min">-1000</param>
+        <param name="max">1000</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    
+    <joint name="propeller_2">
+      <command_interface name="velocity">
+        <param name="min">-1000</param>
+        <param name="max">1000</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    
+    <joint name="propeller_3">
+      <command_interface name="velocity">
+        <param name="min">-1000</param>
+        <param name="max">1000</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    
+    <joint name="propeller_4">
+      <command_interface name="velocity">
+        <param name="min">-1000</param>
+        <param name="max">1000</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+
+  <!-- Gazebo ROS2 Control Plugin -->
+  <!--
+  <gazebo>
+    <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+    </plugin>
+  </gazebo>
+  -->  <!-- Joint State Publisher Plugin for Gazebo Garden -->
   <gazebo>
     <plugin filename="gz-sim-joint-state-publisher-system" 
             name="gz::sim::systems::JointStatePublisher">

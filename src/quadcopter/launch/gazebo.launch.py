@@ -14,6 +14,9 @@ def generate_launch_description():
     # Path to URDF file
     urdf_file = os.path.join(pkg_dir, 'urdf', 'Quadcopter.urdf')
     
+    # Path to controllers config file
+    controllers_config = os.path.join(pkg_dir, 'config', 'controllers.yaml')
+    
     # Read URDF file
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
@@ -51,13 +54,14 @@ def generate_launch_description():
         arguments=['-topic', 'robot_description', '-name', 'quadcopter'],
     )
 
-    # Static transform publisher for base_footprint
-    static_tf_node = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='base_footprint_tf',
-        arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base_footprint'],
-    )
+    # Static transform publisher for base_footprint (already exists as root in URDF)
+    # This is now redundant since base_footprint is the root link
+    # static_tf_node = Node(
+    #     package='tf2_ros',
+    #     executable='static_transform_publisher',
+    #     name='base_footprint_tf',
+    #     arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base_footprint'],
+    # )
 
     # Bridge for camera topics
     bridge_node = Node(
@@ -68,6 +72,17 @@ def generate_launch_description():
         arguments=[
             '/camera@sensor_msgs/msg/Image@gz.msgs.Image',
             '/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'
+        ],
+    )
+
+    # Bridge for IMU topics
+    imu_bridge_node = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='imu_bridge',
+        output='screen',
+        arguments=[
+            '/imu@sensor_msgs/msg/Imu[gz.msgs.IMU'
         ],
     )
 
@@ -105,13 +120,61 @@ def generate_launch_description():
         ],
     )
 
+    # Load controllers
+    load_joint_state_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'joint_state_broadcaster'],
+        output='screen'
+    )
+
+    load_propeller_1_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'propeller_1_controller'],
+        output='screen'
+    )
+
+    load_propeller_2_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'propeller_2_controller'],
+        output='screen'
+    )
+
+    load_propeller_3_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'propeller_3_controller'],
+        output='screen'
+    )
+
+    load_propeller_4_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'propeller_4_controller'],
+        output='screen'
+    )
+
+    # Controller manager node with configuration (disabled for now)
+    # controller_manager = Node(
+    #     package='controller_manager',
+    #     executable='ros2_control_node',
+    #     parameters=[controllers_config, {'use_sim_time': True}],
+    #     output='screen'
+    # )
+
+    # Controller manager spawner to start all controllers (disabled for now)
+    # controller_spawner = Node(
+    #     package='controller_manager',
+    #     executable='spawner',
+    #     arguments=['joint_state_broadcaster', 'propeller_1_controller', 
+    #               'propeller_2_controller', 'propeller_3_controller', 'propeller_4_controller'],
+    #     output='screen'
+    # )
+
     return LaunchDescription([
         gazebo_launch,
         robot_state_publisher_node,
         spawn_entity_node,
-        static_tf_node,
         bridge_node,
         joint_state_bridge_node,
+        imu_bridge_node,
         joint_state_publisher_node,
         rviz_node,
     ])
