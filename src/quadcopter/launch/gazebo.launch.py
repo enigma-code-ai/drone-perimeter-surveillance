@@ -59,9 +59,22 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base_footprint'],
     )
 
+    # Bridge for camera topics
+    bridge_node = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='camera_bridge',
+        output='screen',
+        arguments=[
+            '/camera@sensor_msgs/msg/Image@gz.msgs.Image',
+            '/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'
+        ],
+    )
+
     return LaunchDescription([
         gazebo_launch,
         robot_state_publisher_node,
         spawn_entity_node,
         static_tf_node,
+        bridge_node,
     ])
