@@ -112,6 +112,9 @@
     <limit
       effort="10"
       velocity="1000" />
+    <dynamics
+      damping="0.02"
+      friction="0.0" />
   </joint>
   <link
     name="link_propeller_2">
@@ -168,6 +171,9 @@
     <limit
       effort="10"
       velocity="1000" />
+    <dynamics
+      damping="0.02"
+      friction="0.0" />
   </joint>
   <link
     name="link_propeller_3">
@@ -224,6 +230,9 @@
     <limit
       effort="10"
       velocity="1000" />
+    <dynamics
+      damping="0.02"
+      friction="0.0" />
   </joint>
   <link
     name="link_propeller_4">
@@ -280,6 +289,9 @@
     <limit
       effort="10"
       velocity="1000" />
+    <dynamics
+      damping="0.02"
+      friction="0.0" />
   </joint>
   <link
     name="link_camera">
@@ -335,6 +347,9 @@
       xyz="0 0 0" />
   </joint>
 
+  <!-- Gazebo Classic-style sensor block (camera) is disabled for Gazebo Garden.
+       Sensors should be added via gz-sim systems or SDF world configuration. -->
+  <!--
   <gazebo reference="link_camera">
     <sensor name="camera" type="camera">
       <always_on>1</always_on>
@@ -360,8 +375,11 @@
       </camera>
     </sensor>
   </gazebo>
+  -->
 
-  <!-- IMU Sensor -->
+  <!-- Gazebo Classic-style sensor block (IMU) is disabled for Gazebo Garden.
+       Add IMU via gz-sim system service or SDF world configuration. -->
+  <!--
   <gazebo reference="base_link">
     <sensor name="imu" type="imu">
       <always_on>true</always_on>
@@ -381,6 +399,7 @@
       </imu>
     </sensor>
   </gazebo>
+  -->
 
   <!-- ROS2 Control Configuration for Motor Control -->
   <ros2_control name="QuadcopterSystem" type="system">
@@ -430,7 +449,7 @@
     </joint>
   </ros2_control>
 
-  <!-- Gazebo ROS2 Control Plugin -->
+  <!-- Gazebo ROS2 Control System for Gazebo Garden (disabled until controllers are configured) -->
   <!--
   <gazebo>
     <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
@@ -438,7 +457,8 @@
       <robot_param_node>robot_state_publisher</robot_param_node>
     </plugin>
   </gazebo>
-  -->  <!-- Joint State Publisher Plugin for Gazebo Garden -->
+  -->
+  <!-- Joint State Publisher Plugin for Gazebo Garden -->
   <gazebo>
     <plugin filename="gz-sim-joint-state-publisher-system" 
             name="gz::sim::systems::JointStatePublisher">

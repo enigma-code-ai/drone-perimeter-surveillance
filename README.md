@@ -1,6 +1,6 @@
 # Perimeter Surveillance Quadcopter
 
-Autonomous drone systems for perimeter surveillance.
+Autonomous drone system for perimeter surveillance with real-time threat detection capabilities.
 
 ## Scope Boundaries
 
