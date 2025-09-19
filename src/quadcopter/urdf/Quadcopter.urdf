@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="quadcopter">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.001341 0.0013417 -0.0029971"
+        rpy="0 0 0" />
+      <mass
+        value="0.13344" />
+      <inertia
+        ixx="0.00011864"
+        ixy="-3.3364E-11"
+        ixz="-1.7123E-10"
+        iyy="5.5982E-05"
+        iyz="-1.3427E-07"
+        izz="0.00015929" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.2 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="link_propeller_1">
+    <inertial>
+      <origin
+        xyz="1.0253E-07 0.014059 3.7818E-09"
+        rpy="0 0 0" />
+      <mass
+        value="0.0024223" />
+      <inertia
+        ixx="9.9396E-08"
+        ixy="-7.8073E-13"
+        ixz="6.5339E-09"
+        iyy="1.937E-06"
+        iyz="6.729E-14"
+        izz="1.974E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_propeller_1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_propeller_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="propeller_1"
+    type="continuous">
+    <origin
+      xyz="0.090799 0.10341 0.009"
+      rpy="1.5708 0 0.14191" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_propeller_1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      effort="10"
+      velocity="1000" />
+  </joint>
+  <link
+    name="link_propeller_2">
+    <inertial>
+      <origin
+        xyz="1.0253E-07 0.014059 3.7817E-09"
+        rpy="0 0 0" />
+      <mass
+        value="0.0024223" />
+      <inertia
+        ixx="9.9396E-08"
+        ixy="-7.8072E-13"
+        ixz="6.5339E-09"
+        iyy="1.937E-06"
+        iyz="6.7291E-14"
+        izz="1.974E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_propeller_2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_propeller_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="propeller_2"
+    type="continuous">
+    <origin
+      xyz="-0.090799 0.10341 0.009"
+      rpy="1.5708 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_propeller_2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="10"
+      velocity="1000" />
+  </joint>
+  <link
+    name="link_propeller_3">
+    <inertial>
+      <origin
+        xyz="1.0253E-07 0.014059 3.7816E-09"
+        rpy="0 0 0" />
+      <mass
+        value="0.0024223" />
+      <inertia
+        ixx="9.9396E-08"
+        ixy="-7.8072E-13"
+        ixz="6.5339E-09"
+        iyy="1.937E-06"
+        iyz="6.7292E-14"
+        izz="1.974E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_propeller_3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_propeller_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="propeller_3"
+    type="continuous">
+    <origin
+      xyz="0.085895 -0.09579 0.009"
+      rpy="1.5708 0 2.0866" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_propeller_3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="10"
+      velocity="1000" />
+  </joint>
+  <link
+    name="link_propeller_4">
+    <inertial>
+      <origin
+        xyz="1.0253E-07 0.014059 3.7817E-09"
+        rpy="0 0 0" />
+      <mass
+        value="0.0024223" />
+      <inertia
+        ixx="9.9396E-08"
+        ixy="-7.8072E-13"
+        ixz="6.5339E-09"
+        iyy="1.937E-06"
+        iyz="6.7291E-14"
+        izz="1.974E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_propeller_4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_propeller_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="propeller_4"
+    type="continuous">
+    <origin
+      xyz="-0.085895 -0.09579 0.009"
+      rpy="1.5708 0 0.17226" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_propeller_4" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="10"
+      velocity="1000" />
+  </joint>
+  <link
+    name="link_camera">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.01" />
+      <inertia
+        ixx="1e-6"
+        ixy="0"
+        ixz="0"
+        iyy="1e-6"
+        iyz="0"
+        izz="1e-6" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_camera.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.15 0.15 0.15 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadcopter/meshes/link_camera.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="camera"
+    type="fixed">
+    <origin
+      xyz="0 -0.079 0"
+      rpy="-1.5708 -1.176 -1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_camera" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>
