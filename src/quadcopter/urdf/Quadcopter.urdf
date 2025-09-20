@@ -449,15 +449,13 @@
     </joint>
   </ros2_control>
 
-  <!-- Gazebo ROS2 Control System for Gazebo Garden (disabled until controllers are configured) -->
-  <!--
+  <!-- Gazebo ROS2 Control System for Gazebo Garden -->
   <gazebo>
     <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <robot_param>robot_description</robot_param>
       <robot_param_node>robot_state_publisher</robot_param_node>
     </plugin>
   </gazebo>
-  -->
   <!-- Joint State Publisher Plugin for Gazebo Garden -->
   <gazebo>
     <plugin filename="gz-sim-joint-state-publisher-system" 

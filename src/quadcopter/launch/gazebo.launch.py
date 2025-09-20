@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, ExecuteProcess
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, ExecuteProcess, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -24,6 +24,14 @@ def generate_launch_description():
     # Set the GZ_SIM_RESOURCE_PATH environment variable
     os.environ['GZ_SIM_RESOURCE_PATH'] = os.path.join(pkg_dir, '..')
     
+    # Set environment for resources and ros2_control params
+    set_gz_resource = SetEnvironmentVariable(
+        name='GZ_SIM_RESOURCE_PATH', value=os.path.join(pkg_dir, '..')
+    )
+    set_ros2_control_params = SetEnvironmentVariable(
+        name='ROS2_CONTROL_PARAMS_FILE', value=controllers_config
+    )
+
     # Include Gazebo launch file (using ros_gz_sim)
     gazebo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -144,13 +152,27 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Controller manager node with configuration (disabled for now)
-    # controller_manager = Node(
-    #     package='controller_manager',
-    #     executable='ros2_control_node',
-    #     parameters=[controllers_config, {'use_sim_time': True}],
-    #     output='screen'
-    # )
+    # Delayed spawners to give Gazebo time to inject ros2_control
+    joint_state_spawner = ExecuteProcess(
+        cmd=['bash', '-lc', 'sleep 2 && ros2 run controller_manager spawner joint_state_broadcaster --controller-manager /quadcopter/controller_manager'],
+        output='screen'
+    )
+    prop1_spawner = ExecuteProcess(
+        cmd=['bash', '-lc', 'sleep 3 && ros2 run controller_manager spawner propeller_1_controller --controller-manager /quadcopter/controller_manager'],
+        output='screen'
+    )
+    prop2_spawner = ExecuteProcess(
+        cmd=['bash', '-lc', 'sleep 3 && ros2 run controller_manager spawner propeller_2_controller --controller-manager /quadcopter/controller_manager'],
+        output='screen'
+    )
+    prop3_spawner = ExecuteProcess(
+        cmd=['bash', '-lc', 'sleep 3 && ros2 run controller_manager spawner propeller_3_controller --controller-manager /quadcopter/controller_manager'],
+        output='screen'
+    )
+    prop4_spawner = ExecuteProcess(
+        cmd=['bash', '-lc', 'sleep 3 && ros2 run controller_manager spawner propeller_4_controller --controller-manager /quadcopter/controller_manager'],
+        output='screen'
+    )
 
     # Controller manager spawner to start all controllers (disabled for now)
     # controller_spawner = Node(
@@ -162,11 +184,18 @@ def generate_launch_description():
     # )
 
     return LaunchDescription([
+        set_gz_resource,
+        set_ros2_control_params,
         gazebo_launch,
         robot_state_publisher_node,
         spawn_entity_node,
         bridge_node,
         joint_state_bridge_node,
         imu_bridge_node,
+        joint_state_spawner,
+        prop1_spawner,
+        prop2_spawner,
+        prop3_spawner,
+        prop4_spawner,
         rviz_node,
     ])
