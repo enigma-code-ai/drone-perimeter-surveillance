@@ -1,6 +1,16 @@
-# quadcopter Simulation
+# Perimeter Surveillance Quadcopter
 
-This package contains the URDF, launch files, and configuration for a simulated quadcopter.
+Autonomous drone system for perimeter surveillance with real-time threat detection capabilities.
+
+## Scope Boundaries
+
+This project includes:
+- Location and zone patrols
+- Thread detection (e.g., intruders, unauthorized vehicles, wildlife encroachments, or environmental hazards like fires or leaks, weapon detection, etc.). 
+- Alert system and integration with human security teams.
+- Counter-drone features (for rogue drones)
+- Automated deterrence: Drones could deploy non-lethal responses like bright lights, sirens, or verbal warnings via speakers.
+- Generate automated logs with video evidence for insurance or legal purposes.
 
 ## Prerequisites
 
@@ -31,6 +41,21 @@ To launch the quadcopter in a Gazebo simulation, first source your workspace, th
 source install/setup.bash
 ros2 launch quadcopter gazebo.launch.py
 ```
+
+**Activate Sensors (Required for Gazebo Garden):**
+```bash
+# Activate IMU sensor
+gz service -s /world/empty/entity/system/add --reqtype gz.msgs.EntityPlugin_V --reptype gz.msgs.Boolean --timeout 1000 --req 'entity {id: 16} plugins {name: "gz::sim::systems::Imu" filename: "gz-sim-imu-system"}'
+
+# Activate Camera sensor  
+gz service -s /world/empty/entity/system/add --reqtype gz.msgs.EntityPlugin_V --reptype gz.msgs.Boolean --timeout 1000 --req 'entity {id: 17} plugins {name: "gz::sim::systems::Sensors" filename: "gz-sim-sensors-system"}'
+```
+
+**Available Topics:**
+- `/imu` - IMU sensor data
+- `/camera` - Camera images
+- `/camera_info` - Camera parameters
+- `/joint_states` - Propeller positions/velocities
 
 ### RViz - TODO
 
