@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
-     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
-     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
-<robot
-  name="quadcopter">
-  
+<!-- 
+  Improved Quadcopter URDF for ROS2 Jazzy
+  Includes: IMU, GPS, Camera with optical frame, Battery, Landing gear
+  All necessary Gazebo plugins for simulation
+  Originally created from SolidWorks export, enhanced for simulation
+-->
+<robot name="quadcopter">
+
+  <!-- ============== Base Footprint =================== -->
   <!-- Dummy root link to avoid KDL warning about root link with inertia -->
   <link name="base_footprint">
     <!-- No inertial properties - this is a dummy link -->
@@ -12,19 +15,16 @@
   
   <!-- Fixed joint connecting dummy root to actual base -->
   <joint name="base_footprint_to_base" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0.05" rpy="0 0 0" />
     <parent link="base_footprint" />
     <child link="base_link" />
   </joint>
-  
-  <link
-    name="base_link">
+
+  <!--=================== Base Link =================== -->
+  <link name="base_link">
     <inertial>
-      <origin
-        xyz="-0.001341 0.0013417 -0.0029971"
-        rpy="0 0 0" />
-      <mass
-        value="1.0" />
+      <origin xyz="-0.001341 0.0013417 -0.0029971" rpy="0 0 0" />
+      <mass value="0.8" /> <!-- Reduced to account for battery being separate -->
       <inertia
         ixx="0.00089"
         ixy="-2.5E-10"
@@ -34,273 +34,28 @@
         izz="0.00119" />
     </inertial>
     <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/base_link.STL" />
+        <mesh filename="package://quadcopter/meshes/base_link.STL" />
       </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.2 0.2 0.2 1" />
+      <material name="dark_grey">
+        <color rgba="0.2 0.2 0.2 1" />
       </material>
     </visual>
+    <!-- Simplified collision for better performance -->
     <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/base_link.STL" />
+        <box size="0.25 0.25 0.05" />
       </geometry>
     </collision>
   </link>
-  <link
-    name="link_propeller_1">
+
+  <!--=================== IMU Link (CRITICAL) =================== -->
+  <link name="imu_link">
     <inertial>
-      <origin
-        xyz="1.0253E-07 0.014059 3.7818E-09"
-        rpy="0 0 0" />
-      <mass
-        value="0.0024223" />
-      <inertia
-        ixx="9.9396E-08"
-        ixy="-7.8073E-13"
-        ixz="6.5339E-09"
-        iyy="1.937E-06"
-        iyz="6.729E-14"
-        izz="1.974E-06" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_propeller_1.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.1 0.1 0.1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_propeller_1.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="propeller_1"
-    type="continuous">
-    <origin
-      xyz="0.090799 0.10341 0.009"
-      rpy="1.5708 0 0.14191" />
-    <parent
-      link="base_link" />
-    <child
-      link="link_propeller_1" />
-    <axis
-      xyz="0 0 1" />
-    <limit
-      effort="10"
-      velocity="1000" />
-    <dynamics
-      damping="0.02"
-      friction="0.0" />
-  </joint>
-  <link
-    name="link_propeller_2">
-    <inertial>
-      <origin
-        xyz="1.0253E-07 0.014059 3.7817E-09"
-        rpy="0 0 0" />
-      <mass
-        value="0.0024223" />
-      <inertia
-        ixx="9.9396E-08"
-        ixy="-7.8072E-13"
-        ixz="6.5339E-09"
-        iyy="1.937E-06"
-        iyz="6.7291E-14"
-        izz="1.974E-06" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_propeller_2.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.1 0.1 0.1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_propeller_2.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="propeller_2"
-    type="continuous">
-    <origin
-      xyz="-0.090799 0.10341 0.009"
-      rpy="1.5708 0 0" />
-    <parent
-      link="base_link" />
-    <child
-      link="link_propeller_2" />
-    <axis
-      xyz="0 0 1" />
-    <limit
-      effort="10"
-      velocity="1000" />
-    <dynamics
-      damping="0.02"
-      friction="0.0" />
-  </joint>
-  <link
-    name="link_propeller_3">
-    <inertial>
-      <origin
-        xyz="1.0253E-07 0.014059 3.7816E-09"
-        rpy="0 0 0" />
-      <mass
-        value="0.0024223" />
-      <inertia
-        ixx="9.9396E-08"
-        ixy="-7.8072E-13"
-        ixz="6.5339E-09"
-        iyy="1.937E-06"
-        iyz="6.7292E-14"
-        izz="1.974E-06" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_propeller_3.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.1 0.1 0.1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_propeller_3.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="propeller_3"
-    type="continuous">
-    <origin
-      xyz="0.085895 -0.09579 0.009"
-      rpy="1.5708 0 2.0866" />
-    <parent
-      link="base_link" />
-    <child
-      link="link_propeller_3" />
-    <axis
-      xyz="0 0 1" />
-    <limit
-      effort="10"
-      velocity="1000" />
-    <dynamics
-      damping="0.02"
-      friction="0.0" />
-  </joint>
-  <link
-    name="link_propeller_4">
-    <inertial>
-      <origin
-        xyz="1.0253E-07 0.014059 3.7817E-09"
-        rpy="0 0 0" />
-      <mass
-        value="0.0024223" />
-      <inertia
-        ixx="9.9396E-08"
-        ixy="-7.8072E-13"
-        ixz="6.5339E-09"
-        iyy="1.937E-06"
-        iyz="6.7291E-14"
-        izz="1.974E-06" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_propeller_4.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.1 0.1 0.1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_propeller_4.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="propeller_4"
-    type="continuous">
-    <origin
-      xyz="-0.085895 -0.09579 0.009"
-      rpy="1.5708 0 0.17226" />
-    <parent
-      link="base_link" />
-    <child
-      link="link_propeller_4" />
-    <axis
-      xyz="0 0 1" />
-    <limit
-      effort="10"
-      velocity="1000" />
-    <dynamics
-      damping="0.02"
-      friction="0.0" />
-  </joint>
-  <link
-    name="link_camera">
-    <inertial>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <mass
-        value="0.01" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.001" />
       <inertia
         ixx="1e-6"
         ixy="0"
@@ -310,57 +65,538 @@
         izz="1e-6" />
     </inertial>
     <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_camera.STL" />
+        <box size="0.01 0.01 0.005" />
       </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.15 0.15 0.15 1" />
+      <material name="blue">
+        <color rgba="0 0 0.8 1" />
+      </material>
+    </visual>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="imu_link" />
+  </joint>
+
+  <!--=================== GPS Link =================== -->
+  <link name="gps_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.001" />
+      <inertia
+        ixx="1e-6"
+        ixy="0"
+        ixz="0"
+        iyy="1e-6"
+        iyz="0"
+        izz="1e-6" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.005" />
+      </geometry>
+      <material name="yellow">
+        <color rgba="1 1 0 1" />
+      </material>
+    </visual>
+  </link>
+
+  <joint name="gps_joint" type="fixed">
+    <origin xyz="0 0 0.03" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="gps_link" />
+  </joint>
+
+  <!--=================== Battery Link =================== -->
+  <link name="battery_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.2" /> <!-- 200g LiPo battery -->
+      <inertia
+        ixx="0.00018"
+        ixy="0"
+        ixz="0"
+        iyy="0.00058"
+        iyz="0"
+        izz="0.00066" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.04 0.02" />
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 0.8 1" />
       </material>
     </visual>
     <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="package://quadcopter/meshes/link_camera.STL" />
+        <box size="0.08 0.04 0.02" />
       </geometry>
     </collision>
   </link>
-  <joint
-    name="camera"
-    type="fixed">
-    <origin
-      xyz="0 -0.079 0"
-      rpy="-1.5708 -1.176 -1.5708" />
-    <parent
-      link="base_link" />
-    <child
-      link="link_camera" />
-    <axis
-      xyz="0 0 0" />
+
+  <joint name="battery_joint" type="fixed">
+    <origin xyz="0 0 -0.02" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="battery_link" />
   </joint>
 
-  <!-- Gazebo Classic-style sensor block (camera) is disabled for Gazebo Garden.
-       Sensors should be added via gz-sim systems or SDF world configuration. -->
-  <!--
+  <!--=================== Propeller 1 (Front-Right) =================== -->
+  <link name="link_propeller_1">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.005" /> <!-- Increased for more realistic mass -->
+      <inertia
+        ixx="1.0e-5"
+        ixy="0"
+        ixz="0"
+        iyy="1.937E-05"
+        iyz="0"
+        izz="1.974E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://quadcopter/meshes/link_propeller_1.STL" />
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="propeller_1" type="continuous">
+    <origin xyz="0.090799 0.10341 0.009" rpy="1.5708 0 0.14191" />
+    <parent link="base_link" />
+    <child link="link_propeller_1" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" velocity="2000" />
+    <dynamics damping="0.004" friction="0.001" />
+  </joint>
+
+  <!--=================== Propeller 2 (Front-Left) =================== -->
+  <link name="link_propeller_2">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.005" />
+      <inertia
+        ixx="1.0e-5"
+        ixy="0"
+        ixz="0"
+        iyy="1.937E-05"
+        iyz="0"
+        izz="1.974E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://quadcopter/meshes/link_propeller_2.STL" />
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="propeller_2" type="continuous">
+    <origin xyz="-0.090799 0.10341 0.009" rpy="1.5708 0 0" />
+    <parent link="base_link" />
+    <child link="link_propeller_2" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" velocity="2000" />
+    <dynamics damping="0.004" friction="0.001" />
+  </joint>
+
+  <!--=================== Propeller 3 (Rear-Right) =================== -->
+  <link name="link_propeller_3">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.005" />
+      <inertia
+        ixx="1.0e-5"
+        ixy="0"
+        ixz="0"
+        iyy="1.937E-05"
+        iyz="0"
+        izz="1.974E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://quadcopter/meshes/link_propeller_3.STL" />
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="propeller_3" type="continuous">
+    <origin xyz="0.085895 -0.09579 0.009" rpy="1.5708 0 2.0866" />
+    <parent link="base_link" />
+    <child link="link_propeller_3" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" velocity="2000" />
+    <dynamics damping="0.004" friction="0.001" />
+  </joint>
+
+  <!--=================== Propeller 4 (Rear-Left) =================== -->
+  <link name="link_propeller_4">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.005" />
+      <inertia
+        ixx="1.0e-5"
+        ixy="0"
+        ixz="0"
+        iyy="1.937E-05"
+        iyz="0"
+        izz="1.974E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://quadcopter/meshes/link_propeller_4.STL" />
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="propeller_4" type="continuous">
+    <origin xyz="-0.085895 -0.09579 0.009" rpy="1.5708 0 0.17226" />
+    <parent link="base_link" />
+    <child link="link_propeller_4" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" velocity="2000" />
+    <dynamics damping="0.004" friction="0.001" />
+  </joint>
+
+  <!--=================== Camera Link =================== -->
+  <link name="link_camera">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.01" />
+      <inertia
+        ixx="1e-6"
+        ixy="0"
+        ixz="0"
+        iyy="1e-6"
+        iyz="0"
+        izz="1e-6" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://quadcopter/meshes/link_camera.STL" />
+      </geometry>
+      <material name="dark_grey">
+        <color rgba="0.15 0.15 0.15 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.04 0.02" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="camera" type="fixed">
+    <origin xyz="0 -0.079 0" rpy="-1.5708 -1.176 -1.5708" />
+    <parent link="base_link" />
+    <child link="link_camera" />
+    <axis xyz="0 0 0" />
+  </joint>
+
+  <!--=================== Camera Optical Frame =================== -->
+  <link name="camera_optical_link">
+    <!-- No inertial properties - this is just a frame -->
+  </link>
+
+  <joint name="camera_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708" />
+    <parent link="link_camera" />
+    <child link="camera_optical_link" />
+  </joint>
+
+  <!--=================== Landing Gear =================== -->
+  <!-- Front Right Landing Gear -->
+  <link name="landing_gear_fr">
+    <inertial>
+      <mass value="0.001" />
+      <inertia
+        ixx="1e-7"
+        ixy="0"
+        ixz="0"
+        iyy="1e-7"
+        iyz="0"
+        izz="1e-7" />
+    </inertial>
+    <collision>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+    </collision>
+    <visual>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+  </link>
+
+  <joint name="landing_gear_fr_joint" type="fixed">
+    <origin xyz="0.08 0.08 -0.04" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="landing_gear_fr" />
+  </joint>
+
+  <!-- Front Left Landing Gear -->
+  <link name="landing_gear_fl">
+    <inertial>
+      <mass value="0.001" />
+      <inertia
+        ixx="1e-7"
+        ixy="0"
+        ixz="0"
+        iyy="1e-7"
+        iyz="0"
+        izz="1e-7" />
+    </inertial>
+    <collision>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+    </collision>
+    <visual>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+  </link>
+
+  <joint name="landing_gear_fl_joint" type="fixed">
+    <origin xyz="-0.08 0.08 -0.04" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="landing_gear_fl" />
+  </joint>
+
+  <!-- Rear Right Landing Gear -->
+  <link name="landing_gear_rr">
+    <inertial>
+      <mass value="0.001" />
+      <inertia
+        ixx="1e-7"
+        ixy="0"
+        ixz="0"
+        iyy="1e-7"
+        iyz="0"
+        izz="1e-7" />
+    </inertial>
+    <collision>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+    </collision>
+    <visual>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+  </link>
+
+  <joint name="landing_gear_rr_joint" type="fixed">
+    <origin xyz="0.08 -0.08 -0.04" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="landing_gear_rr" />
+  </joint>
+
+  <!-- Rear Left Landing Gear -->
+  <link name="landing_gear_rl">
+    <inertial>
+      <mass value="0.001" />
+      <inertia
+        ixx="1e-7"
+        ixy="0"
+        ixz="0"
+        iyy="1e-7"
+        iyz="0"
+        izz="1e-7" />
+    </inertial>
+    <collision>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+    </collision>
+    <visual>
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+  </link>
+
+  <joint name="landing_gear_rl_joint" type="fixed">
+    <origin xyz="-0.08 -0.08 -0.04" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="landing_gear_rl" />
+  </joint>
+
+  <!-- ===================== GAZEBO PLUGINS ===================== -->
+  
+  <!-- Sensors System Plugin - Required for IMU, Camera, and other sensors -->
+  <gazebo>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+  </gazebo>
+  
+  <!-- Gazebo Materials -->
+  <gazebo reference="base_link">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="link_propeller_1">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="link_propeller_2">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="link_propeller_3">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="link_propeller_4">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
   <gazebo reference="link_camera">
-    <sensor name="camera" type="camera">
-      <always_on>1</always_on>
-      <update_rate>30</update_rate>
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="battery_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <gazebo reference="landing_gear_fr">
+    <material>Gazebo/Black</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo reference="landing_gear_fl">
+    <material>Gazebo/Black</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo reference="landing_gear_rr">
+    <material>Gazebo/Black</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo reference="landing_gear_rl">
+    <material>Gazebo/Black</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <!-- IMU Plugin -->
+  <gazebo reference="imu_link">
+    <gravity>true</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
       <visualize>true</visualize>
-      <topic>camera</topic>
-      <camera name="head">
+      <topic>imu</topic>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+  </gazebo>
+
+  <!-- GPS Plugin - Disabled for compatibility -->
+  <!-- 
+  <gazebo>
+    <plugin name="gps_plugin" filename="libhector_gazebo_ros_gps.so">
+      <updateRate>5.0</updateRate>
+      <bodyName>gps_link</bodyName>
+      <frameId>gps_link</frameId>
+      <topicName>gps/fix</topicName>
+      <velocityTopicName>gps/velocity</velocityTopicName>
+      <referenceLatitude>49.9</referenceLatitude>
+      <referenceLongitude>8.9</referenceLongitude>
+      <referenceHeading>0</referenceHeading>
+      <referenceAltitude>0</referenceAltitude>
+      <drift>0.0001 0.0001 0.0001</drift>
+    </plugin>
+  </gazebo>
+  -->
+
+  <!-- Camera Plugin -->
+  <gazebo reference="link_camera">
+    <sensor type="camera" name="camera_sensor">
+      <update_rate>30.0</update_rate>
+      <camera name="front_camera">
         <horizontal_fov>1.3962634</horizontal_fov>
         <image>
-          <width>800</width>
-          <height>800</height>
+          <width>640</width>
+          <height>480</height>
           <format>R8G8B8</format>
         </image>
         <clip>
@@ -373,44 +609,48 @@
           <stddev>0.007</stddev>
         </noise>
       </camera>
+      <topic>camera</topic>
+      <gz_frame_id>camera_optical_link</gz_frame_id>
     </sensor>
   </gazebo>
-  -->
 
-  <!-- Gazebo Classic-style sensor block (IMU) is disabled for Gazebo Garden.
-       Add IMU via gz-sim system service or SDF world configuration. -->
+  <!-- Ground Truth Odometry Plugin - Disabled for compatibility -->
   <!--
-  <gazebo reference="base_link">
-    <sensor name="imu" type="imu">
-      <always_on>true</always_on>
-      <update_rate>250</update_rate>
-      <topic>/imu</topic>
-      <imu>
-        <angular_velocity>
-          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.0001</stddev></noise></x>
-          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.0001</stddev></noise></y>
-          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.0001</stddev></noise></z>
-        </angular_velocity>
-        <linear_acceleration>
-          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.01</stddev></noise></x>
-          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.01</stddev></noise></y>
-          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.01</stddev></noise></z>
-        </linear_acceleration>
-      </imu>
-    </sensor>
+  <gazebo>
+    <plugin name="ground_truth" filename="libgazebo_ros_p3d.so">
+      <frameName>world</frameName>
+      <bodyName>base_link</bodyName>
+      <topicName>ground_truth/odom</topicName>
+      <updateRate>50.0</updateRate>
+    </plugin>
   </gazebo>
   -->
 
-  <!-- Joint State Publisher Plugin for Gazebo Garden -->
+  <!-- Joint State Publisher Plugin -->
   <gazebo>
     <plugin filename="gz-sim-joint-state-publisher-system" 
             name="gz::sim::systems::JointStatePublisher">
-      <topic>joint_states</topic>
+      <update_rate>30</update_rate>
       <joint_name>propeller_1</joint_name>
       <joint_name>propeller_2</joint_name>
       <joint_name>propeller_3</joint_name>
       <joint_name>propeller_4</joint_name>
     </plugin>
   </gazebo>
+
+  <!-- Motor Model Plugins - Disabled for compatibility with Gazebo Garden
+  Motor model plugins for quadcopter control are disabled because
+  libgazebo_motor_model.so is not available in Gazebo Garden.
+  For motor control in Garden, use the built-in MulticopterMotorModel system.
+  -->
+
+  <!-- Gazebo Control Plugin - Disabled for compatibility
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/quadcopter</robotNamespace>
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+  </gazebo>
+  -->
 
 </robot>

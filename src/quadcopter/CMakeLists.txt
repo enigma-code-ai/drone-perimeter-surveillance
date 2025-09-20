@@ -13,8 +13,15 @@ install(DIRECTORY
   config 
   launch 
   meshes 
+  scripts
   urdf
   DESTINATION share/${PROJECT_NAME}/
+)
+
+# Install scripts
+install(PROGRAMS
+  scripts/simple_joint_state_publisher.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)

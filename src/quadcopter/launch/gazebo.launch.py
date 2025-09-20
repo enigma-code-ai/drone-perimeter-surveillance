@@ -47,6 +47,15 @@ def generate_launch_description():
         parameters=[{'robot_description': robot_desc}, {'use_sim_time': True}],
     )
 
+    # Joint state publisher - publishes default joint positions
+    joint_state_publisher_node = Node(
+        package='quadcopter',
+        executable='simple_joint_state_publisher.py',
+        name='simple_joint_state_publisher',
+        output='screen',
+        parameters=[{'use_sim_time': True}],
+    )
+
     # Spawn robot in Gazebo (using ros_gz_sim)
     spawn_entity_node = Node(
         package='ros_gz_sim',
@@ -88,16 +97,17 @@ def generate_launch_description():
         ],
     )
 
-    # Bridge for joint states from Gazebo to ROS
-    joint_state_bridge_node = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='joint_state_bridge',
-        output='screen',
-        arguments=['/joint_states@sensor_msgs/msg/JointState@gz.msgs.Model'],
-    )
+    # Bridge for joint states from Gazebo to ROS - DISABLED
+    # We're now using our custom joint state publisher instead of Gazebo
+    # joint_state_bridge_node = Node(
+    #     package='ros_gz_bridge',
+    #     executable='parameter_bridge',
+    #     name='joint_state_bridge',
+    #     output='screen',
+    #     arguments=['/joint_states@sensor_msgs/msg/JointState@gz.msgs.Model'],
+    # )
 
-    # Joint states are published by gz-sim JointStatePublisher system; no bridge needed
+    # Joint states are published by our custom joint state publisher
 
     # RViz configuration file path
     rviz_config_file = os.path.join(pkg_dir, 'config', 'quadcopter_view.rviz')
@@ -119,9 +129,9 @@ def generate_launch_description():
         set_gz_resource,
         gazebo_launch,
         robot_state_publisher_node,
+        joint_state_publisher_node,
         spawn_entity_node,
         bridge_node,
-        joint_state_bridge_node,
         imu_bridge_node,
         rviz_node,
     ])
