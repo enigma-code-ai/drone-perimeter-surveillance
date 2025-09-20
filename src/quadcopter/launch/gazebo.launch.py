@@ -14,9 +14,6 @@ def generate_launch_description():
     # Path to URDF file
     urdf_file = os.path.join(pkg_dir, 'urdf', 'quadcopter.urdf')
     
-    # Path to controllers config file
-    controllers_config = os.path.join(pkg_dir, 'config', 'controllers.yaml')
-    
     # Read URDF file
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
@@ -24,12 +21,9 @@ def generate_launch_description():
     # Set the GZ_SIM_RESOURCE_PATH environment variable
     os.environ['GZ_SIM_RESOURCE_PATH'] = os.path.join(pkg_dir, '..')
     
-    # Set environment for resources and ros2_control params
+    # Set environment for resources
     set_gz_resource = SetEnvironmentVariable(
         name='GZ_SIM_RESOURCE_PATH', value=os.path.join(pkg_dir, '..')
-    )
-    set_ros2_control_params = SetEnvironmentVariable(
-        name='ROS2_CONTROL_PARAMS_FILE', value=controllers_config
     )
 
     # Include Gazebo launch file (using ros_gz_sim)
@@ -121,81 +115,13 @@ def generate_launch_description():
 
     # Fallback joint state publisher (disabled; using Gazebo joint state bridge)
 
-    # Load controllers
-    load_joint_state_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
-             'joint_state_broadcaster'],
-        output='screen'
-    )
-
-    load_propeller_1_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
-             'propeller_1_controller'],
-        output='screen'
-    )
-
-    load_propeller_2_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
-             'propeller_2_controller'],
-        output='screen'
-    )
-
-    load_propeller_3_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
-             'propeller_3_controller'],
-        output='screen'
-    )
-
-    load_propeller_4_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
-             'propeller_4_controller'],
-        output='screen'
-    )
-
-    # Delayed spawners to give Gazebo time to inject ros2_control
-    joint_state_spawner = ExecuteProcess(
-        cmd=['bash', '-lc', 'sleep 2 && ros2 run controller_manager spawner joint_state_broadcaster --controller-manager /quadcopter/controller_manager'],
-        output='screen'
-    )
-    prop1_spawner = ExecuteProcess(
-        cmd=['bash', '-lc', 'sleep 3 && ros2 run controller_manager spawner propeller_1_controller --controller-manager /quadcopter/controller_manager'],
-        output='screen'
-    )
-    prop2_spawner = ExecuteProcess(
-        cmd=['bash', '-lc', 'sleep 3 && ros2 run controller_manager spawner propeller_2_controller --controller-manager /quadcopter/controller_manager'],
-        output='screen'
-    )
-    prop3_spawner = ExecuteProcess(
-        cmd=['bash', '-lc', 'sleep 3 && ros2 run controller_manager spawner propeller_3_controller --controller-manager /quadcopter/controller_manager'],
-        output='screen'
-    )
-    prop4_spawner = ExecuteProcess(
-        cmd=['bash', '-lc', 'sleep 3 && ros2 run controller_manager spawner propeller_4_controller --controller-manager /quadcopter/controller_manager'],
-        output='screen'
-    )
-
-    # Controller manager spawner to start all controllers (disabled for now)
-    # controller_spawner = Node(
-    #     package='controller_manager',
-    #     executable='spawner',
-    #     arguments=['joint_state_broadcaster', 'propeller_1_controller', 
-    #               'propeller_2_controller', 'propeller_3_controller', 'propeller_4_controller'],
-    #     output='screen'
-    # )
-
     return LaunchDescription([
         set_gz_resource,
-        set_ros2_control_params,
         gazebo_launch,
         robot_state_publisher_node,
         spawn_entity_node,
         bridge_node,
         joint_state_bridge_node,
         imu_bridge_node,
-        joint_state_spawner,
-        prop1_spawner,
-        prop2_spawner,
-        prop3_spawner,
-        prop4_spawner,
         rviz_node,
     ])

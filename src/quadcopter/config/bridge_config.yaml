@@ -1,30 +1,5 @@
 # ROS2-Gazebo Bridge Configuration for Quadcopter
-# This file configures the bridge between Gazebo Garden and ROS2 for sensor data and motor control
-
-# Motor Control Topics - ROS2 Control Controllers
-- ros_topic_name: "/propeller_1_controller/commands"
-  gz_topic_name: "/propeller_1_controller/commands"
-  ros_type_name: "std_msgs/msg/Float64"
-  gz_type_name: "gz.msgs.Double"
-  direction: ROS_TO_GZ
-
-- ros_topic_name: "/propeller_2_controller/commands"
-  gz_topic_name: "/propeller_2_controller/commands"
-  ros_type_name: "std_msgs/msg/Float64"
-  gz_type_name: "gz.msgs.Double"
-  direction: ROS_TO_GZ
-
-- ros_topic_name: "/propeller_3_controller/commands"
-  gz_topic_name: "/propeller_3_controller/commands"
-  ros_type_name: "std_msgs/msg/Float64"
-  gz_type_name: "gz.msgs.Double"
-  direction: ROS_TO_GZ
-
-- ros_topic_name: "/propeller_4_controller/commands"
-  gz_topic_name: "/propeller_4_controller/commands"
-  ros_type_name: "std_msgs/msg/Float64"
-  gz_type_name: "gz.msgs.Double"
-  direction: ROS_TO_GZ
+# This file configures the bridge between Gazebo Garden and ROS2 for sensor data
 
 # IMU Sensor Data - From Gazebo to ROS2
 - ros_topic_name: "/imu"
@@ -46,7 +21,7 @@
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS
 
-# Joint States - From Gazebo to ROS2 (handled by ROS2 Control)
+# Joint States - From Gazebo to ROS2
 - ros_topic_name: "/joint_states"
   gz_topic_name: "/joint_states"
   ros_type_name: "sensor_msgs/msg/JointState"
